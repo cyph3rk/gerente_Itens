@@ -39,8 +39,7 @@ public class ItenController {
     }
 
     @PostMapping
-    public ResponseEntity<Object> cadastraItens(@PathVariable Long id,
-                                                 @RequestBody ItensForm itensForm) {
+    public ResponseEntity<Object> cadastraItens(@RequestBody ItensForm itensForm) {
 
         logger.info("POST - Try : Cadastro de um novo Item: Nome: " + itensForm.getNome());
 
