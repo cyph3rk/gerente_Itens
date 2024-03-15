@@ -147,5 +147,103 @@ class ItensTestIT {
         return word.toString();
     }
 
+    @Test
+    public void pesquisaItensPorId_SucessoTest() {
+
+        String randomWord = geraPalavraRandomica(8);
+        String url = "http://localhost:" + port + "/itens";
+
+        String requestBody = "{\"nome\":\"" + randomWord + "\"," +
+                "\"valor\":\"10,00\"," +
+                "\"qtd\":\"10\"}";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
+        Assert.assertEquals(HttpStatus.CREATED, response.getStatusCode());
+
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode jsonNode = objectMapper.readTree(response.getBody());
+
+            String mensagem = jsonNode.get("Messagem").asText();
+            String id = jsonNode.get("id").asText();
+
+            Assert.assertEquals(mensagem, "Item CADASTRADO com sucesso.");
+
+            url = "http://localhost:" + port + "/itens/" + id;
+            requestEntity = new HttpEntity<>(headers);
+            response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, String.class);
+
+            String resp = "{\"id\":" + id + "," +
+                    "\"nome\":\"" + randomWord + "\"," +
+                    "\"valor\":\"10,00\"," +
+                    "\"qtd\":\"10\"}";
+
+            Assert.assertTrue(response.getBody() != null && response.getBody().contains(resp));
+
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void pesquisaItensPorId_FalhaTest() {
+        String url = "http://localhost:" + port + "/itens/99968";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, String.class);
+        Assert.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        Assert.assertTrue(response.getBody() != null && response.getBody().contains("{\"Erro\": \"Item NÃO cadastrado.\"}"));
+    }
+
+    @Test
+    public void addQtdItens_SucessoTest() {
+
+        String randomWord = geraPalavraRandomica(8);
+        String url = "http://localhost:" + port + "/itens";
+
+        String requestBody = "{\"nome\":\"" + randomWord + "\"," +
+                "\"valor\":\"10,00\"," +
+                "\"qtd\":\"10\"}";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
+        Assert.assertEquals(HttpStatus.CREATED, response.getStatusCode());
+
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode jsonNode = objectMapper.readTree(response.getBody());
+
+            String mensagem = jsonNode.get("Messagem").asText();
+            String id = jsonNode.get("id").asText();
+
+            Assert.assertEquals(mensagem, "Item CADASTRADO com sucesso.");
+
+            url = "http://localhost:" + port + "/itens/" + id + "/10";
+
+            requestEntity = new HttpEntity<>(requestBody, headers);
+            response = restTemplate.exchange(url, HttpMethod.PUT, requestEntity, String.class);
+
+            String resp = "{\"id\":" + id + "," +
+                    "\"nome\":\"" + randomWord + "\"," +
+                    "\"valor\":\"10,00\"," +
+                    "\"qtd\":\"20\"}";
+
+            jsonNode = objectMapper.readTree(response.getBody());
+            mensagem = jsonNode.get("Messagem").asText();
+//            String id = jsonNode.get("id").asText();
+
+            Assert.assertEquals(mensagem, "Add Item ALTERADO com sucesso.");
+
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+    }
+
 
 }
