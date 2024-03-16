@@ -34,7 +34,7 @@ class ItensTestIT {
 
         String requestBody = "{\"nome\":\"" + randomWord + "\"," +
                 "\"valor\":\"10,00\"," +
-                "\"qtd\":\"10\"}";
+                "\"estoque\":\"10\"}";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -62,7 +62,7 @@ class ItensTestIT {
 
         String requestBody = "{\"nome\":\""+ randomWord +"\"," +
                 "\"valor\":\"11,00\"," +
-                "\"qtd\":\"11\"}";
+                "\"estoque\":\"11\"}";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -97,7 +97,7 @@ class ItensTestIT {
 
         String requestBody = "{\"nome\":\"" + randomWord + "\"," +
                 "\"valor\":\"10,00\"," +
-                "\"qtd\":\"10\"}";
+                "\"estoque\":\"10\"}";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -155,7 +155,7 @@ class ItensTestIT {
 
         String requestBody = "{\"nome\":\"" + randomWord + "\"," +
                 "\"valor\":\"10,00\"," +
-                "\"qtd\":\"10\"}";
+                "\"estoque\":\"10\"}";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -179,7 +179,7 @@ class ItensTestIT {
             String resp = "{\"id\":" + id + "," +
                     "\"nome\":\"" + randomWord + "\"," +
                     "\"valor\":\"10,00\"," +
-                    "\"qtd\":\"10\"}";
+                    "\"estoque\":\"10\"}";
 
             Assert.assertTrue(response.getBody() != null && response.getBody().contains(resp));
 
@@ -207,7 +207,7 @@ class ItensTestIT {
 
         String requestBody = "{\"nome\":\"" + randomWord + "\"," +
                 "\"valor\":\"10,00\"," +
-                "\"qtd\":\"10\"}";
+                "\"estoque\":\"10\"}";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -232,7 +232,7 @@ class ItensTestIT {
             String resp = "{\"id\":" + id + "," +
                     "\"nome\":\"" + randomWord + "\"," +
                     "\"valor\":\"10,00\"," +
-                    "\"qtd\":\"20\"}";
+                    "\"estoque\":\"20\"}";
 
             jsonNode = objectMapper.readTree(response.getBody());
             mensagem = jsonNode.get("Messagem").asText();

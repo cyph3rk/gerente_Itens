@@ -43,7 +43,7 @@ public class ItensFacade {
         Itens itens = new Itens();
         itens.setNome(itensDto.getNome());
         itens.setValor(itensDto.getValor());
-        itens.setQtd(itensDto.getQtd());
+        itens.setEstoque(itensDto.getEstoque());
 
         itensRepositorio.save(itens);
 
@@ -55,7 +55,7 @@ public class ItensFacade {
         result.setId(itens.getId());
         result.setNome(itens.getNome());
         result.setValor(itens.getValor());
-        result.setQtd(itens.getQtd());
+        result.setEstoque(itens.getEstoque());
 
         return result;
     }
@@ -75,7 +75,7 @@ public class ItensFacade {
             itensDto.setId(itens.getId());
             itensDto.setNome(itens.getNome());
             itensDto.setValor(itens.getValor());
-            itensDto.setQtd(itens.getQtd());
+            itensDto.setEstoque(itens.getEstoque());
 
             return Optional.of(itensDto);
         } catch (EntityNotFoundException ex) {
@@ -97,12 +97,12 @@ public class ItensFacade {
         itens.setNome(itensDto.getNome());
         itens.setValor(itensDto.getValor());
 
-        long qtdAtual = Long.parseLong(itensDto.getQtd());
+        long qtdAtual = Long.parseLong(itensDto.getEstoque());
         long qtdSomar = Long.parseLong(qtd);
         long total = qtdAtual + qtdSomar;
         String qtdTotal = Long.toString(total);
 
-        itens.setQtd(qtdTotal);
+        itens.setEstoque(qtdTotal);
 
         itensRepositorio.save(itens);
 

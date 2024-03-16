@@ -10,16 +10,16 @@ public class ItensDto {
     private Long id;
     private String nome;
     private String valor;
-    private String qtd;
+    private String estoque;
 
     public ItensDto() {
 
     }
 
-    public ItensDto(String nome, String valor, String qtd) {
+    public ItensDto(String nome, String valor, String estoque) {
         this.nome = nome;
         this.valor = valor;
-        this.qtd = qtd;
+        this.estoque = estoque;
     }
 
 }

@@ -3,7 +3,6 @@ package br.com.fiap.gerente_itens.controller;
 import br.com.fiap.gerente_itens.controller.form.ItensForm;
 import br.com.fiap.gerente_itens.dto.ItensDto;
 import br.com.fiap.gerente_itens.facade.ItensFacade;
-import br.com.fiap.gerente_itens.model.Itens;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.ConstraintViolation;
@@ -51,7 +50,7 @@ public class ItenController {
         }
 
         ItensDto itensDTO = new ItensDto(itensForm.getNome(),
-                itensForm.getValor(), itensForm.getQtd());
+                itensForm.getValor(), itensForm.getEstoque());
         Long resp = itensFacade.salvar(itensDTO);
         if ( resp == -1) {
             return ResponseEntity.badRequest().body("{\"Erro\": \"Item JÁ cadastrado.\"}");
@@ -86,7 +85,7 @@ public class ItenController {
 
         boolean existeRegistro = itensDto.isPresent();
         if (!existeRegistro) {
-            return ResponseEntity.badRequest().body("{\"Erro\": \"Equipamento NÃO cadastrado.\"}");
+            return ResponseEntity.badRequest().body("{\"Erro\": \"Item NÃO cadastrado.\"}");
         }
 
         return ResponseEntity.status(HttpStatus.OK).body(itensDto);
@@ -131,7 +130,7 @@ public class ItenController {
         itensDto_new.setId(id);
         itensDto_new.setNome(itensDto_old.get().getNome());
         itensDto_new.setValor(itensDto_old.get().getValor());
-        itensDto_new.setQtd(itensDto_old.get().getQtd());
+        itensDto_new.setEstoque(itensDto_old.get().getEstoque());
 
         Long resp = itensFacade.altera(itensDto_new, qtd);
         if ( resp == -1) {

@@ -2,8 +2,6 @@ package br.com.fiap.gerente_itens.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -26,12 +24,12 @@ public class Itens {
     private String valor;
 
     @JsonProperty
-    private String qtd;
+    private String estoque;
 
-    public Itens(String nome, String valor, String qtd) {
+    public Itens(String nome, String valor, String estoque) {
         this.nome = nome;
         this.valor = valor;
-        this.qtd = qtd;
+        this.estoque = estoque;
     }
 
     public Itens() {

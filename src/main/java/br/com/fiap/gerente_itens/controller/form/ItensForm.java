@@ -20,10 +20,10 @@ public class ItensForm {
 
     @JsonProperty
     @NotBlank(message = "Campo QUANTIDADE é obrigatorio")
-    private String qtd;
+    private String estoque;
 
     public ItensDto toItensDto() {
-        return new ItensDto(nome, valor, qtd);
+        return new ItensDto(nome, valor, estoque);
     }
 
 }
