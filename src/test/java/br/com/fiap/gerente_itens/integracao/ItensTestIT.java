@@ -30,7 +30,7 @@ class ItensTestIT {
     public void testeCadastrandoItensSucesso() {
 
         String randomWord = geraPalavraRandomica(8);
-        String url = "http://localhost:" + port + "/itens";
+        String url = "http://localhost:" + port + "/api/itens";
 
         String requestBody = "{\"nome\":\"" + randomWord + "\"," +
                 "\"valor\":\"10,00\"," +
@@ -58,7 +58,7 @@ class ItensTestIT {
     public void tentativaCadastrandoitemDuplicado_Test() {
 
         String randomWord = geraPalavraRandomica(8);
-        String url = "http://localhost:" + port + "/itens";
+        String url = "http://localhost:" + port + "/api/itens";
 
         String requestBody = "{\"nome\":\""+ randomWord +"\"," +
                 "\"valor\":\"11,00\"," +
@@ -93,7 +93,7 @@ class ItensTestIT {
     public void deletaEndereco_SucessoTest() {
 
         String randomWord = geraPalavraRandomica(8);
-        String url = "http://localhost:" + port + "/itens";
+        String url = "http://localhost:" + port + "/api/itens";
 
         String requestBody = "{\"nome\":\"" + randomWord + "\"," +
                 "\"valor\":\"10,00\"," +
@@ -112,7 +112,7 @@ class ItensTestIT {
             String mensagem = jsonNode.get("Messagem").asText();
             String id = jsonNode.get("id").asText();
 
-            url = "http://localhost:" + port + "/itens/" + id;
+            url = "http://localhost:" + port + "/api/itens/" + id;
             requestEntity = new HttpEntity<>(headers);
             response = restTemplate.exchange(url, HttpMethod.DELETE, requestEntity, String.class);
             Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -125,7 +125,7 @@ class ItensTestIT {
 
     @Test
     public void deletaEndereco_FalhaTest() {
-        String url = "http://localhost:" + port + "/itens/99968";
+        String url = "http://localhost:" + port + "/api/itens/99968";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -151,7 +151,7 @@ class ItensTestIT {
     public void pesquisaItensPorId_SucessoTest() {
 
         String randomWord = geraPalavraRandomica(8);
-        String url = "http://localhost:" + port + "/itens";
+        String url = "http://localhost:" + port + "/api/itens";
 
         String requestBody = "{\"nome\":\"" + randomWord + "\"," +
                 "\"valor\":\"10,00\"," +
@@ -172,7 +172,7 @@ class ItensTestIT {
 
             Assert.assertEquals(mensagem, "Item CADASTRADO com sucesso.");
 
-            url = "http://localhost:" + port + "/itens/" + id;
+            url = "http://localhost:" + port + "/api/itens/" + id;
             requestEntity = new HttpEntity<>(headers);
             response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, String.class);
 
@@ -190,20 +190,20 @@ class ItensTestIT {
 
     @Test
     public void pesquisaItensPorId_FalhaTest() {
-        String url = "http://localhost:" + port + "/itens/99968";
+        String url = "http://localhost:" + port + "/api/itens/99968";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> requestEntity = new HttpEntity<>(headers);
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, String.class);
-        Assert.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        Assert.assertTrue(response.getBody() != null && response.getBody().contains("{\"Erro\": \"Item NÃO cadastrado.\"}"));
+        Assert.assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        Assert.assertTrue(response.getBody() != null && response.getBody().contains("Item NÃO encontrado."));
     }
 
     @Test
     public void addQtdItens_SucessoTest() {
 
         String randomWord = geraPalavraRandomica(8);
-        String url = "http://localhost:" + port + "/itens";
+        String url = "http://localhost:" + port + "/api/itens";
 
         String requestBody = "{\"nome\":\"" + randomWord + "\"," +
                 "\"valor\":\"10,00\"," +
@@ -224,7 +224,7 @@ class ItensTestIT {
 
             Assert.assertEquals(mensagem, "Item CADASTRADO com sucesso.");
 
-            url = "http://localhost:" + port + "/itens/" + id + "/10";
+            url = "http://localhost:" + port + "/api/itens/" + id + "/10";
 
             requestEntity = new HttpEntity<>(requestBody, headers);
             response = restTemplate.exchange(url, HttpMethod.PUT, requestEntity, String.class);

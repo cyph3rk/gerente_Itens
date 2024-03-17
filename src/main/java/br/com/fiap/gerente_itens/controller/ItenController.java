@@ -18,8 +18,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/itens")
+@RequestMapping("/api/itens")
 public class ItenController {
+
+    public static final String ERRO = "Item NÃO encontrado.";
+    public static final String SUCESSO = "Item ADICIONADO com sucesso.";
 
     private static final Logger logger = LoggerFactory.getLogger(ItenController.class);
 
@@ -79,13 +82,12 @@ public class ItenController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Object> getItensPorId(@PathVariable Long id) {
-        logger.info("GET - Pedido de Itens por Id: " + id);
 
         Optional<ItensDto> itensDto = itensFacade.buscarPorId(id);
 
         boolean existeRegistro = itensDto.isPresent();
         if (!existeRegistro) {
-            return ResponseEntity.badRequest().body("{\"Erro\": \"Item NÃO cadastrado.\"}");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ERRO);
         }
 
         return ResponseEntity.status(HttpStatus.OK).body(itensDto);
