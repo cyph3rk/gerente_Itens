@@ -3,7 +3,11 @@ package br.com.fiap.gerente_itens.integracao;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,11 +27,15 @@ class ItensTestIT {
     @LocalServerPort
     private int port;
 
+    private String token;
+
     @Autowired
     private TestRestTemplate restTemplate;
 
     @Test
     public void testeCadastrandoItensSucesso() {
+
+        geraTokenTest();
 
         String randomWord = geraPalavraRandomica(8);
         String url = "http://localhost:" + port + "/api/itens";
@@ -37,6 +45,7 @@ class ItensTestIT {
                 "\"estoque\":\"10\"}";
 
         HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + token);
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
@@ -57,6 +66,8 @@ class ItensTestIT {
     @Test
     public void tentativaCadastrandoitemDuplicado_Test() {
 
+        geraTokenTest();
+
         String randomWord = geraPalavraRandomica(8);
         String url = "http://localhost:" + port + "/api/itens";
 
@@ -65,6 +76,7 @@ class ItensTestIT {
                 "\"estoque\":\"11\"}";
 
         HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + token);
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
@@ -92,6 +104,8 @@ class ItensTestIT {
     @Test
     public void deletaEndereco_SucessoTest() {
 
+        geraTokenTest();
+
         String randomWord = geraPalavraRandomica(8);
         String url = "http://localhost:" + port + "/api/itens";
 
@@ -101,6 +115,7 @@ class ItensTestIT {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Authorization", "Bearer " + token);
         HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
         Assert.assertEquals(HttpStatus.CREATED, response.getStatusCode());
@@ -125,10 +140,14 @@ class ItensTestIT {
 
     @Test
     public void deletaEndereco_FalhaTest() {
+
+        geraTokenTest();
+
         String url = "http://localhost:" + port + "/api/itens/99968";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Authorization", "Bearer " + token);
         HttpEntity<String> requestEntity = new HttpEntity<>(headers);
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.DELETE, requestEntity, String.class);
         Assert.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
@@ -150,6 +169,8 @@ class ItensTestIT {
     @Test
     public void pesquisaItensPorId_SucessoTest() {
 
+        geraTokenTest();
+
         String randomWord = geraPalavraRandomica(8);
         String url = "http://localhost:" + port + "/api/itens";
 
@@ -159,6 +180,7 @@ class ItensTestIT {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Authorization", "Bearer " + token);
         HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
         Assert.assertEquals(HttpStatus.CREATED, response.getStatusCode());
@@ -190,9 +212,11 @@ class ItensTestIT {
 
     @Test
     public void pesquisaItensPorId_FalhaTest() {
+        geraTokenTest();
         String url = "http://localhost:" + port + "/api/itens/99968";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Authorization", "Bearer " + token);
         HttpEntity<String> requestEntity = new HttpEntity<>(headers);
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, String.class);
         Assert.assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
@@ -201,6 +225,8 @@ class ItensTestIT {
 
     @Test
     public void addQtdItens_SucessoTest() {
+
+        geraTokenTest();
 
         String randomWord = geraPalavraRandomica(8);
         String url = "http://localhost:" + port + "/api/itens";
@@ -211,6 +237,7 @@ class ItensTestIT {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Authorization", "Bearer " + token);
         HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
         Assert.assertEquals(HttpStatus.CREATED, response.getStatusCode());
@@ -245,5 +272,30 @@ class ItensTestIT {
         }
     }
 
+    public void geraTokenTest() {
+
+        String url = "http://localhost:8082/auth/login";
+
+        String requestBody = "{\"login\":\"testedev\"," +
+                "\"password\":\"testedev\"}";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
+        Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
+
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode jsonNode = objectMapper.readTree(response.getBody());
+
+            token = jsonNode.get("token").asText();
+
+            Assert.assertNotNull(token);
+
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+    }
 
 }

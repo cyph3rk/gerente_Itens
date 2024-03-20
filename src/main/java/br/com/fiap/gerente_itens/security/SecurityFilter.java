@@ -1,6 +1,7 @@
 package br.com.fiap.gerente_itens.security;
 
 import br.com.fiap.gerente_itens.model.Usuario;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -25,12 +26,17 @@ import java.util.NoSuchElementException;
 
 @Component
 public class SecurityFilter extends OncePerRequestFilter {
+
+    private static final Logger logger = LoggerFactory.getLogger(SecurityFilter.class);
+
     @Autowired
     TokenService tokenService;
     @Autowired
     private RestTemplate restTemplate;
     @Autowired
-    ModelMapper modelMapper;
+    private ModelMapper modelMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -47,6 +53,16 @@ public class SecurityFilter extends OncePerRequestFilter {
                 );
 
                 UserDetails user = modelMapper.map(responseAPI.getBody(), Usuario.class);
+
+//                JsonNode userJson = objectMapper.readTree(responseAPI.getBody());
+//                UserDetails user2 = (UserDetails) userJson.get(responseAPI.getBody());
+//                logger.info("GET - user2: " + user2.getUsername() + " - " + user2.getPassword());
+
+
+                logger.info("GET - responseAPI.getBody(): " + responseAPI.getBody());
+                logger.info("GET - --->>> 1: " + user.toString());
+                logger.info("GET - --->>> 2: " + user.toString());
+                logger.info("GET - --->>> doFilterInternal: " + user.getUsername() + " - " + user.getPassword());
 
                 var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(authentication);

@@ -1,5 +1,7 @@
 package br.com.fiap.gerente_itens.model;
 
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,6 +21,8 @@ public class Usuario implements UserDetails {
     private Long id;
     private String login;
     private String password;
+
+    @Enumerated(EnumType.STRING)
     private UserRole role;
 
     public Usuario(String login, String password, UserRole role){
