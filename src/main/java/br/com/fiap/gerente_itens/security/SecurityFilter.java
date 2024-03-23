@@ -3,11 +3,11 @@ package br.com.fiap.gerente_itens.security;
 import br.com.fiap.gerente_itens.model.Usuario;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,10 +33,6 @@ public class SecurityFilter extends OncePerRequestFilter {
     TokenService tokenService;
     @Autowired
     private RestTemplate restTemplate;
-    @Autowired
-    private ModelMapper modelMapper;
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -52,18 +48,9 @@ public class SecurityFilter extends OncePerRequestFilter {
                         login
                 );
 
-                UserDetails user = modelMapper.map(responseAPI.getBody(), Usuario.class);
 
-//                JsonNode userJson = objectMapper.readTree(responseAPI.getBody());
-//                UserDetails user2 = (UserDetails) userJson.get(responseAPI.getBody());
-//                logger.info("GET - user2: " + user2.getUsername() + " - " + user2.getPassword());
-
-
-                logger.info("GET - responseAPI.getBody(): " + responseAPI.getBody());
-                logger.info("GET - --->>> 1: " + user.toString());
-                logger.info("GET - --->>> 2: " + user.toString());
-                logger.info("GET - --->>> doFilterInternal: " + user.getUsername() + " - " + user.getPassword());
-
+                Gson gson = new Gson();
+                UserDetails user = gson.fromJson(responseAPI.getBody(), Usuario.class);
                 var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(authentication);
 

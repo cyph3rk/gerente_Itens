@@ -6,7 +6,6 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
-import org.modelmapper.ModelMapper;
 
 @Configuration
 @ComponentScan("br.com.fiap")
@@ -20,11 +19,6 @@ public class AppConfig {
         restTemplate.getMessageConverters().add(converter);
 
         return restTemplate;
-    }
-
-    @Bean
-    public ModelMapper obterModelMapper() {
-        return new ModelMapper();
     }
 
 }
