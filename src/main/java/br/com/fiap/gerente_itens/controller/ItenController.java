@@ -25,6 +25,7 @@ public class ItenController {
     private static final String ALTERADO_SUCESSO = "Item ALTERADO com sucesso.";
     private static final String JA_CADASTRADO = "Item JÁ cadastrado.";
     private static final String ERRO_INESPERADO = "Erro inesperado.";
+    private static final String SEM_ESTOQUE = "Solicitação maior que o estoque disponível";
 
     private final Validator validator;
 
@@ -114,8 +115,8 @@ public class ItenController {
         return ResponseEntity.ok(DELETE_SUCESSO);
     }
 
-    @PutMapping("/{id}/{qtd}")
-    public ResponseEntity<Object> addStoqueItensPorId(@PathVariable Long id, @PathVariable String qtd) {
+    @PutMapping("/soma/{id}/{qtd}")
+    public ResponseEntity<Object> somaStoquePorId(@PathVariable Long id, @PathVariable String qtd) {
 
         Optional<ItensDto> itensDtoold = itensFacade.buscarPorId(id);
         boolean existeRegistro = itensDtoold.isPresent();
@@ -132,6 +133,31 @@ public class ItenController {
         Long resp = itensFacade.altera(itensDtonew, qtd);
         if ( resp == -1) {
             return ResponseEntity.badRequest().body(ERRO_INESPERADO);
+        }
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(ALTERADO_SUCESSO);
+    }
+
+    @PutMapping("/diminui/{id}/{qtd}")
+    public ResponseEntity<Object> diminuiStoquePorId(@PathVariable Long id, @PathVariable String qtd) {
+
+        Optional<ItensDto> itensDtoold = itensFacade.buscarPorId(id);
+        boolean existeRegistro = itensDtoold.isPresent();
+        if (!existeRegistro) {
+            return ResponseEntity.badRequest().body(ERRO);
+        }
+
+        ItensDto itensDto = new ItensDto();
+        itensDto.setId(id);
+        itensDto.setNome(itensDtoold.get().getNome());
+        itensDto.setValor(itensDtoold.get().getValor());
+        itensDto.setEstoque(itensDtoold.get().getEstoque());
+
+        Long resp = itensFacade.diminuiStoquePorId(itensDto, qtd);
+        if (resp == -1L) {
+            return ResponseEntity.badRequest().body(ERRO_INESPERADO);
+        } else if (resp == -2L) {
+            return ResponseEntity.badRequest().body(SEM_ESTOQUE);
         }
 
         return ResponseEntity.status(HttpStatus.CREATED).body(ALTERADO_SUCESSO);

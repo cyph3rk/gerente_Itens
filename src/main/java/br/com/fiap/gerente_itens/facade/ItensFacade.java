@@ -101,4 +101,27 @@ public class ItensFacade {
         return itens.getId();
 
     }
+
+    public Long diminuiStoquePorId(ItensDto itensDto, String qtd) {
+        Itens itens = itensRepositorio.getReferenceById(itensDto.getId());
+        itens.setId(itensDto.getId());
+        itens.setNome(itensDto.getNome());
+        itens.setValor(itensDto.getValor());
+        itens.setEstoque(itensDto.getEstoque());
+
+        long qtdVenda = Long.parseLong(qtd);
+        long qtdAtual = Long.parseLong(itens.getEstoque());
+
+        if (qtdVenda > qtdAtual) {
+            return -2L;
+        } else {
+            long total = qtdAtual - qtdVenda;
+            String qtdTotal = Long.toString(total);
+            itens.setEstoque(qtdTotal);
+        }
+        itensRepositorio.save(itens);
+
+        return itens.getId();
+
+    }
 }

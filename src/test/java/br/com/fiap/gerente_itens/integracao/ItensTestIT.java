@@ -34,13 +34,13 @@ class ItensTestIT {
     private static final String DELETE_SUCESSO = "Item DELETADO com sucesso";
     private static final String ALTERADO_SUCESSO = "Item ALTERADO com sucesso.";
     private static final String JA_CADASTRADO = "Item JÁ cadastrado.";
-
+    private static final String SEM_ESTOQUE = "Solicitação maior que o estoque disponível";
     @Test
     void testeCadastrandoItensSucesso() throws JsonProcessingException {
 
         geraTokenTest();
 
-        String randomWord = geraPalavraRandomica(8);
+        String randomWord = geraPalavraRandomica();
         String url = "http://localhost:" + port + "/api/itens";
 
         Itens itens = geraItem(randomWord);
@@ -65,7 +65,7 @@ class ItensTestIT {
 
         geraTokenTest();
 
-        String randomWord = geraPalavraRandomica(8);
+        String randomWord = geraPalavraRandomica();
         String url = "http://localhost:" + port + "/api/itens";
 
         Itens itens = geraItem(randomWord);
@@ -94,7 +94,7 @@ class ItensTestIT {
 
         geraTokenTest();
 
-        String randomWord = geraPalavraRandomica(8);
+        String randomWord = geraPalavraRandomica();
         String url = "http://localhost:" + port + "/api/itens";
 
         Itens itens = geraItem(randomWord);
@@ -143,7 +143,7 @@ class ItensTestIT {
 
         geraTokenTest();
 
-        String randomWord = geraPalavraRandomica(8);
+        String randomWord = geraPalavraRandomica();
         String url = "http://localhost:" + port + "/api/itens";
 
         Itens itens = geraItem(randomWord);
@@ -191,11 +191,11 @@ class ItensTestIT {
     }
 
     @Test
-    void addQtdItens_SucessoTest() throws JsonProcessingException {
+    void soma_Item_Estoque_SucessoTest() throws JsonProcessingException {
 
         geraTokenTest();
 
-        String randomWord = geraPalavraRandomica(8);
+        String randomWord = geraPalavraRandomica();
         String url = "http://localhost:" + port + "/api/itens";
 
         Itens itens = geraItem(randomWord);
@@ -218,13 +218,108 @@ class ItensTestIT {
 
         Assert.assertEquals(SUCESSO, mensagem);
 
-        url = "http://localhost:" + port + "/api/itens/" + id + "/10";
+        url = "http://localhost:" + port + "/api/itens/soma/" + id + "/10";
 
         requestEntity = new HttpEntity<>(requestBody, headers);
         response = restTemplate.exchange(url, HttpMethod.PUT, requestEntity, String.class);
 
         Assert.assertEquals(ALTERADO_SUCESSO, response.getBody());
 
+        url = "http://localhost:" + port + "/api/itens/" + id;
+        requestEntity = new HttpEntity<>(headers);
+        response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, String.class);
+
+        String resp = "{\"id\":" + id + "," +
+                "\"nome\":\"" + randomWord + "\"," +
+                "\"valor\":\"10,00\"," +
+                "\"estoque\":\"20\"}";
+
+        Assert.assertTrue(response.getBody() != null && response.getBody().contains(resp));
+
+    }
+
+    @Test
+    void diminui_Item_Estoque_SucessoTest() throws JsonProcessingException {
+
+        geraTokenTest();
+
+        String randomWord = geraPalavraRandomica();
+        String url = "http://localhost:" + port + "/api/itens";
+
+        Itens itens = geraItem(randomWord);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String requestBody = objectMapper.writeValueAsString(itens);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Authorization", "Bearer " + token);
+        HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
+        Assert.assertEquals(HttpStatus.CREATED, response.getStatusCode());
+
+
+        objectMapper = new ObjectMapper();
+        JsonNode jsonNode = objectMapper.readTree(response.getBody());
+
+        String mensagem = jsonNode.get("Messagem").asText();
+        String id = jsonNode.get("id").asText();
+
+        Assert.assertEquals(SUCESSO, mensagem);
+
+        url = "http://localhost:" + port + "/api/itens/diminui/" + id + "/1";
+
+        requestEntity = new HttpEntity<>(requestBody, headers);
+        response = restTemplate.exchange(url, HttpMethod.PUT, requestEntity, String.class);
+
+        Assert.assertEquals(ALTERADO_SUCESSO, response.getBody());
+
+        url = "http://localhost:" + port + "/api/itens/" + id;
+        requestEntity = new HttpEntity<>(headers);
+        response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, String.class);
+
+        String resp = "{\"id\":" + id + "," +
+                "\"nome\":\"" + randomWord + "\"," +
+                "\"valor\":\"10,00\"," +
+                "\"estoque\":\"9\"}";
+
+        Assert.assertTrue(response.getBody() != null && response.getBody().contains(resp));
+
+    }
+
+    @Test
+    void diminui_Item_Estoque_FalhaTest() throws JsonProcessingException {
+
+        geraTokenTest();
+
+        String randomWord = geraPalavraRandomica();
+        String url = "http://localhost:" + port + "/api/itens";
+
+        Itens itens = geraItem(randomWord);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String requestBody = objectMapper.writeValueAsString(itens);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Authorization", "Bearer " + token);
+        HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
+        Assert.assertEquals(HttpStatus.CREATED, response.getStatusCode());
+
+
+        objectMapper = new ObjectMapper();
+        JsonNode jsonNode = objectMapper.readTree(response.getBody());
+
+        String mensagem = jsonNode.get("Messagem").asText();
+        String id = jsonNode.get("id").asText();
+
+        Assert.assertEquals(SUCESSO, mensagem);
+
+        url = "http://localhost:" + port + "/api/itens/diminui/" + id + "/11";
+
+        requestEntity = new HttpEntity<>(requestBody, headers);
+        response = restTemplate.exchange(url, HttpMethod.PUT, requestEntity, String.class);
+        Assert.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        Assert.assertTrue(response.getBody() != null && response.getBody().contains(SEM_ESTOQUE));
 
     }
 
@@ -258,7 +353,8 @@ class ItensTestIT {
         }
     }
 
-    private static String geraPalavraRandomica(int length) {
+    private static String geraPalavraRandomica() {
+        int length = 8;
         String allowedChars = "abcdefghijklmnopqrstuvwxyz";
         Random random = new Random();
         StringBuilder word = new StringBuilder();
