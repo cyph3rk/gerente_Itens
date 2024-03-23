@@ -87,16 +87,7 @@ class ItensTestIT {
         response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
         Assert.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode jsonNode = objectMapper.readTree(response.getBody());
-
-            String mensagem = jsonNode.get("Erro").asText();
-
-            Assert.assertEquals(JA_CADASTRADO, mensagem);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
+        Assert.assertEquals(JA_CADASTRADO, response.getBody());
 
         response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
         Assert.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
@@ -245,10 +236,7 @@ class ItensTestIT {
             requestEntity = new HttpEntity<>(requestBody, headers);
             response = restTemplate.exchange(url, HttpMethod.PUT, requestEntity, String.class);
 
-            jsonNode = objectMapper.readTree(response.getBody());
-            mensagem = jsonNode.get("Messagem").asText();
-
-            Assert.assertEquals(ALTERADO_SUCESSO, mensagem);
+            Assert.assertEquals(ALTERADO_SUCESSO, response.getBody());
 
         } catch (JsonProcessingException e) {
             e.printStackTrace();
