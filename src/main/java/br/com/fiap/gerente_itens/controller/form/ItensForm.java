@@ -1,6 +1,5 @@
 package br.com.fiap.gerente_itens.controller.form;
 
-import br.com.fiap.gerente_itens.dto.ItensDto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
@@ -21,9 +20,4 @@ public class ItensForm {
     @JsonProperty
     @NotBlank(message = "Campo QUANTIDADE é obrigatorio")
     private String estoque;
-
-    public ItensDto toItensDto() {
-        return new ItensDto(nome, valor, estoque);
-    }
-
 }

@@ -5,19 +5,14 @@ import br.com.fiap.gerente_itens.model.Itens;
 import br.com.fiap.gerente_itens.repositorio.IItensRepositorio;
 
 import jakarta.persistence.EntityNotFoundException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class ItensFacade {
-
-    private static final Logger logger = LoggerFactory.getLogger(ItensFacade.class);
 
     private final IItensRepositorio itensRepositorio;
 
@@ -30,13 +25,13 @@ public class ItensFacade {
         List<Itens> listaItens = itensRepositorio.findByNome(nome);
 
         return listaItens.stream()
-                .map(this::converter).collect(Collectors.toList());
+                .map(this::converter).toList();
     }
 
     public Long salvar(ItensDto itensDto) {
 
         List<ItensDto> encontrado = buscarPorNome(itensDto.getNome());
-        if (encontrado.size() >= 1) {
+        if (!encontrado.isEmpty()) {
             return -1L;
         }
 
@@ -64,7 +59,7 @@ public class ItensFacade {
         return itensRepositorio
                 .findAll()
                 .stream()
-                .map(this::converter).collect(Collectors.toList());
+                .map(this::converter).toList();
     }
 
     public Optional<ItensDto> buscarPorId(Long id) {
@@ -79,14 +74,11 @@ public class ItensFacade {
 
             return Optional.of(itensDto);
         } catch (EntityNotFoundException ex) {
-            logger.info("ItensFacade - buscarPorId Id: " + id + (" Não cadastrado"));
             return Optional.empty();
-            //todo: fazer o lancamento exception 35:00
         }
     }
 
     public void remove(Long id) {
-        //Todo: Implementar a verificação se cadastro existe antes de deletar
         itensRepositorio.deleteById(id);
     }
 

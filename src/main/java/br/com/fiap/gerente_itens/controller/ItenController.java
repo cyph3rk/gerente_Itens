@@ -3,15 +3,11 @@ package br.com.fiap.gerente_itens.controller;
 import br.com.fiap.gerente_itens.controller.form.ItensForm;
 import br.com.fiap.gerente_itens.dto.ItensDto;
 import br.com.fiap.gerente_itens.facade.ItensFacade;
-import br.com.fiap.gerente_itens.security.TokenService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Path;
 import jakarta.validation.Validator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,10 +19,12 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/itens")
 public class ItenController {
 
-    public static final String ERRO = "Item NÃO encontrado.";
-    public static final String SUCESSO = "Item ADICIONADO com sucesso.";
-
-    private static final Logger logger = LoggerFactory.getLogger(ItenController.class);
+    private static final String ERRO = "Item NÃO encontrado.";
+    private static final String SUCESSO = "Item CADASTRADO com sucesso.";
+    private static final String DELETE_SUCESSO = "Item DELETADO com sucesso";
+    private static final String ALTERADO_SUCESSO = "Item ALTERADO com sucesso.";
+    private static final String JA_CADASTRADO = "Item JÁ cadastrado.";
+    private static final String ERRO_INESPERADO = "Erro inesperado.";
 
     private final Validator validator;
 
@@ -47,8 +45,6 @@ public class ItenController {
     @PostMapping
     public ResponseEntity<Object> cadastraItens(@RequestBody ItensForm itensForm) {
 
-        logger.info("POST - Try : Cadastro de um novo Item: Nome: " + itensForm.getNome());
-
         Map<Path, String> violacoesToMap = validar(itensForm);
         if (!violacoesToMap.isEmpty()) {
             return ResponseEntity.badRequest().body(violacoesToMap);
@@ -58,19 +54,16 @@ public class ItenController {
                 itensForm.getValor(), itensForm.getEstoque());
         Long resp = itensFacade.salvar(itensDTO);
         if ( resp == -1) {
-            return ResponseEntity.badRequest().body("{\"Erro\": \"Item JÁ cadastrado.\"}");
+            return ResponseEntity.badRequest().body(JA_CADASTRADO);
         }
 
-        logger.info("POST - Sucesso : Cadastro Item: Nome: " + itensDTO.getNome() + "Id: " + resp);
-        return ResponseEntity.status(HttpStatus.CREATED).body("{\"Messagem\": \"Item CADASTRADO com sucesso.\", " +
+        return ResponseEntity.status(HttpStatus.CREATED).body("{\"Messagem\": \"" + SUCESSO + "\", " +
                 "\"id\": \"" + resp +"\"}");
     }
 
 
     @GetMapping
     public ResponseEntity<String> getAllItens() {
-        logger.info("GET - Pedido de todos os Itens cadastrados");
-
         String json = "Erro Inesperado";
         try {
             ObjectMapper objectMapper = new ObjectMapper();
@@ -100,8 +93,8 @@ public class ItenController {
 
         List<ItensDto> itensDto = itensFacade.buscarPorNome(nome);
 
-        if (itensDto.size() == 0) {
-            return ResponseEntity.badRequest().body("{\"Erro\": \"Item NÃO cadastrado.\"}");
+        if (itensDto.isEmpty()) {
+            return ResponseEntity.badRequest().body(ERRO);
         }
 
         return ResponseEntity.status(HttpStatus.OK).body(itensDto);
@@ -114,36 +107,34 @@ public class ItenController {
 
         boolean existeRegistro = itensDto.isPresent();
         if (!existeRegistro) {
-            return ResponseEntity.badRequest().body("{\"Erro\": \"Item NÃO cadastrado.\"}");
+            return ResponseEntity.badRequest().body(ERRO);
         }
 
         itensFacade.remove(id);
-        return ResponseEntity.ok("{\"Mensagem\": \"Item DELETADO com sucesso.\"}");
+        return ResponseEntity.ok(DELETE_SUCESSO);
     }
 
     @PutMapping("/{id}/{qtd}")
     public ResponseEntity<Object> addStoqueItensPorId(@PathVariable Long id, @PathVariable String qtd) {
 
-        Optional<ItensDto> itensDto_old = itensFacade.buscarPorId(id);
-        boolean existeRegistro = itensDto_old.isPresent();
+        Optional<ItensDto> itensDtoold = itensFacade.buscarPorId(id);
+        boolean existeRegistro = itensDtoold.isPresent();
         if (!existeRegistro) {
-            return ResponseEntity.badRequest().body("{\"Erro\": \"Item NÃO cadastrado.\"}");
+            return ResponseEntity.badRequest().body(ERRO);
         }
 
-        ItensDto itensDto_new = new ItensDto();
-        itensDto_new.setId(id);
-        itensDto_new.setNome(itensDto_old.get().getNome());
-        itensDto_new.setValor(itensDto_old.get().getValor());
-        itensDto_new.setEstoque(itensDto_old.get().getEstoque());
+        ItensDto itensDtonew = new ItensDto();
+        itensDtonew.setId(id);
+        itensDtonew.setNome(itensDtoold.get().getNome());
+        itensDtonew.setValor(itensDtoold.get().getValor());
+        itensDtonew.setEstoque(itensDtoold.get().getEstoque());
 
-        Long resp = itensFacade.altera(itensDto_new, qtd);
+        Long resp = itensFacade.altera(itensDtonew, qtd);
         if ( resp == -1) {
-            return ResponseEntity.badRequest().body("{\"Erro\": \"Erro inesperado.\"}");
+            return ResponseEntity.badRequest().body(ERRO_INESPERADO);
         }
 
-        logger.info("POST - Sucesso : Add Stoque Pessoa: Nome: " + itensDto_new.getNome() + "Id: " + resp);
-        return ResponseEntity.status(HttpStatus.CREATED).body("{\"Messagem\": \"Add Item ALTERADO com sucesso.\", " +
-                "\"id\": \"" + resp +"\"}");
+        return ResponseEntity.status(HttpStatus.CREATED).body(ALTERADO_SUCESSO);
     }
 
 }

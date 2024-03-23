@@ -3,11 +3,7 @@ package br.com.fiap.gerente_itens.integracao;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -32,8 +28,14 @@ class ItensTestIT {
     @Autowired
     private TestRestTemplate restTemplate;
 
+    private static final String ERRO = "Item NÃO encontrado.";
+    private static final String SUCESSO = "Item CADASTRADO com sucesso.";
+    private static final String DELETE_SUCESSO = "Item DELETADO com sucesso";
+    private static final String ALTERADO_SUCESSO = "Item ALTERADO com sucesso.";
+    private static final String JA_CADASTRADO = "Item JÁ cadastrado.";
+
     @Test
-    public void testeCadastrandoItensSucesso() {
+    void testeCadastrandoItensSucesso() {
 
         geraTokenTest();
 
@@ -57,14 +59,14 @@ class ItensTestIT {
 
             String mensagem = jsonNode.get("Messagem").asText();
 
-            Assert.assertEquals(mensagem, "Item CADASTRADO com sucesso.");
+            Assert.assertEquals(SUCESSO, mensagem);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
     }
 
     @Test
-    public void tentativaCadastrandoitemDuplicado_Test() {
+    void tentativaCadastrandoitemDuplicado_Test() {
 
         geraTokenTest();
 
@@ -91,18 +93,18 @@ class ItensTestIT {
 
             String mensagem = jsonNode.get("Erro").asText();
 
-            Assert.assertEquals(mensagem, "Item JÁ cadastrado.");
+            Assert.assertEquals(JA_CADASTRADO, mensagem);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
 
         response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
         Assert.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        Assert.assertTrue(response.getBody() != null && response.getBody().contains("{\"Erro\": \"Item JÁ cadastrado.\"}"));
+        Assert.assertTrue(response.getBody() != null && response.getBody().contains(JA_CADASTRADO));
     }
 
     @Test
-    public void deletaEndereco_SucessoTest() {
+    void deletaEndereco_SucessoTest() {
 
         geraTokenTest();
 
@@ -124,14 +126,13 @@ class ItensTestIT {
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode jsonNode = objectMapper.readTree(response.getBody());
 
-            String mensagem = jsonNode.get("Messagem").asText();
             String id = jsonNode.get("id").asText();
 
             url = "http://localhost:" + port + "/api/itens/" + id;
             requestEntity = new HttpEntity<>(headers);
             response = restTemplate.exchange(url, HttpMethod.DELETE, requestEntity, String.class);
             Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
-            Assert.assertTrue(response.getBody() != null && response.getBody().contains("{\"Mensagem\": \"Item DELETADO com sucesso.\"}"));
+            Assert.assertTrue(response.getBody() != null && response.getBody().contains(DELETE_SUCESSO));
 
         } catch (JsonProcessingException e) {
             e.printStackTrace();
@@ -139,7 +140,7 @@ class ItensTestIT {
     }
 
     @Test
-    public void deletaEndereco_FalhaTest() {
+    void deletaEndereco_FalhaTest() {
 
         geraTokenTest();
 
@@ -151,23 +152,11 @@ class ItensTestIT {
         HttpEntity<String> requestEntity = new HttpEntity<>(headers);
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.DELETE, requestEntity, String.class);
         Assert.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        Assert.assertTrue(response.getBody() != null && response.getBody().contains("{\"Erro\": \"Item NÃO cadastrado.\"}"));
-    }
-
-    private static String geraPalavraRandomica(int length) {
-        String allowedChars = "abcdefghijklmnopqrstuvwxyz";
-        Random random = new Random();
-        StringBuilder word = new StringBuilder();
-        for (int i = 0; i < length; i++) {
-            int randomIndex = random.nextInt(allowedChars.length());
-            char randomChar = allowedChars.charAt(randomIndex);
-            word.append(randomChar);
-        }
-        return word.toString();
+        Assert.assertTrue(response.getBody() != null && response.getBody().contains(ERRO));
     }
 
     @Test
-    public void pesquisaItensPorId_SucessoTest() {
+    void pesquisaItensPorId_SucessoTest() {
 
         geraTokenTest();
 
@@ -192,7 +181,7 @@ class ItensTestIT {
             String mensagem = jsonNode.get("Messagem").asText();
             String id = jsonNode.get("id").asText();
 
-            Assert.assertEquals(mensagem, "Item CADASTRADO com sucesso.");
+            Assert.assertEquals(SUCESSO, mensagem);
 
             url = "http://localhost:" + port + "/api/itens/" + id;
             requestEntity = new HttpEntity<>(headers);
@@ -211,7 +200,7 @@ class ItensTestIT {
     }
 
     @Test
-    public void pesquisaItensPorId_FalhaTest() {
+    void pesquisaItensPorId_FalhaTest() {
         geraTokenTest();
         String url = "http://localhost:" + port + "/api/itens/99968";
         HttpHeaders headers = new HttpHeaders();
@@ -220,11 +209,11 @@ class ItensTestIT {
         HttpEntity<String> requestEntity = new HttpEntity<>(headers);
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, String.class);
         Assert.assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        Assert.assertTrue(response.getBody() != null && response.getBody().contains("Item NÃO encontrado."));
+        Assert.assertTrue(response.getBody() != null && response.getBody().contains(ERRO));
     }
 
     @Test
-    public void addQtdItens_SucessoTest() {
+    void addQtdItens_SucessoTest() {
 
         geraTokenTest();
 
@@ -249,30 +238,24 @@ class ItensTestIT {
             String mensagem = jsonNode.get("Messagem").asText();
             String id = jsonNode.get("id").asText();
 
-            Assert.assertEquals(mensagem, "Item CADASTRADO com sucesso.");
+            Assert.assertEquals(SUCESSO, mensagem);
 
             url = "http://localhost:" + port + "/api/itens/" + id + "/10";
 
             requestEntity = new HttpEntity<>(requestBody, headers);
             response = restTemplate.exchange(url, HttpMethod.PUT, requestEntity, String.class);
 
-            String resp = "{\"id\":" + id + "," +
-                    "\"nome\":\"" + randomWord + "\"," +
-                    "\"valor\":\"10,00\"," +
-                    "\"estoque\":\"20\"}";
-
             jsonNode = objectMapper.readTree(response.getBody());
             mensagem = jsonNode.get("Messagem").asText();
-//            String id = jsonNode.get("id").asText();
 
-            Assert.assertEquals(mensagem, "Add Item ALTERADO com sucesso.");
+            Assert.assertEquals(ALTERADO_SUCESSO, mensagem);
 
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
     }
 
-    public void geraTokenTest() {
+    void geraTokenTest() {
 
         String url = "http://localhost:8082/auth/login";
 
@@ -296,6 +279,18 @@ class ItensTestIT {
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
+    }
+
+    private static String geraPalavraRandomica(int length) {
+        String allowedChars = "abcdefghijklmnopqrstuvwxyz";
+        Random random = new Random();
+        StringBuilder word = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            int randomIndex = random.nextInt(allowedChars.length());
+            char randomChar = allowedChars.charAt(randomIndex);
+            word.append(randomChar);
+        }
+        return word.toString();
     }
 
 }
