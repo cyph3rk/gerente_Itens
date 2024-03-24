@@ -57,7 +57,6 @@ class ItensTestIT {
         JsonNode jsonNode = objectMapper.readTree(response.getBody());
         String mensagem = jsonNode.get("Messagem").asText();
         Assert.assertEquals(SUCESSO, mensagem);
-
     }
 
     @Test
